@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>La Tua Famiglia – Raccolta Dati</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --warm:#1C1410;--cream:#FBF8F2;--bg:#F2EDE4;
+  --gold:#B8860B;--gold-lt:#E8D080;
+  --teal:#1A5F50;--teal-lt:#C8E8E0;
+  --rose:#7A2020;--rose-lt:#F0D0D0;
+  --slate:#1A3050;--slate-lt:#C8D8F0;
+  --amber:#8A4010;--amber-lt:#F0DEC0;
+  --sage:#2A5030;--sage-lt:#C8E8D0;
+  --border:#D8D0C0;--muted:#9A8F80;
+  --serif:'Lora',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);font-family:var(--sans);display:flex;flex-direction:column}
+
+/* PASSWORD OVERLAY */
+.pw-overlay{position:fixed;inset:0;z-index:9999;background:var(--warm);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px}
+.pw-card{background:#2A2018;border:1px solid rgba(184,134,11,.3);border-radius:16px;padding:28px 22px;max-width:360px;width:100%;text-align:center}
+.pw-icon{font-size:52px;margin-bottom:8px}
+.pw-title{font-family:var(--serif);font-size:20px;color:#fff;font-weight:400;margin-bottom:4px;font-style:italic}
+.pw-sub{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:16px;line-height:1.5}
+.pw-input{width:100%;padding:14px;border:1px solid rgba(184,134,11,.4);border-radius:11px;background:#1C1410;color:#fff;font-family:var(--sans);font-size:16px;text-align:center;outline:none;letter-spacing:6px;font-weight:700;transition:border-color .2s}
+.pw-input:focus{border-color:var(--gold)}
+.pw-input::placeholder{color:rgba(255,255,255,.2);letter-spacing:2px;font-weight:300;font-size:14px}
+.pw-error{font-size:11px;color:var(--rose);margin-top:6px;display:none}
+.pw-btn{width:100%;padding:14px;border:none;border-radius:11px;font-family:var(--sans);font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;background:linear-gradient(135deg,var(--gold),#8B6914);color:#fff;box-shadow:0 4px 20px rgba(184,134,11,.3);transition:all .2s}
+.pw-btn:active{transform:scale(.97)}
+.pw-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:8px}
+
+/* LANGUAGE BAR */
+.lang-bar{display:flex;justify-content:flex-end;padding:6px 20px;gap:4px;flex-shrink:0;background:var(--warm);border-bottom:1px solid rgba(255,255,255,.1)}
+.lang-btn{padding:4px 10px;border-radius:5px;border:1px solid transparent;background:transparent;color:rgba(255,255,255,.4);font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px;text-transform:uppercase}
+.lang-btn.active{background:rgba(184,134,11,.2);color:var(--gold-lt);border-color:rgba(184,134,11,.3)}
+
+/* HEADER */
+.hdr{background:var(--warm);padding:0 20px;flex-shrink:0;position:relative;z-index:10}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 8px}
+.hdr-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
+.hdr-title{font-family:var(--serif);font-size:18px;color:#fff;font-weight:400;font-style:italic;text-align:center}
+.hdr-action{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px;cursor:pointer}
+.sec-tabs{display:flex;gap:4px;padding:8px 20px;background:var(--warm);overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none}
+.sec-tabs::-webkit-scrollbar{display:none}
+.sec-tab{flex-shrink:0;padding:5px 10px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:all .2s;color:rgba(255,255,255,.35);border:none;background:transparent;white-space:nowrap}
+.sec-tab.on{background:rgba(255,255,255,.12);color:var(--gold-lt)}
+.prog{padding:0 0 10px}
+.prog-bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:2px;transition:width .5s ease}
+.prog-meta{display:flex;justify-content:space-between;margin-top:6px}
+.prog-meta span{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:1px}
+
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:100px}
+
+/* SECTIONS */
+.sec{display:none}
+.sec.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sec-head{padding:18px 20px 0}
+.sec-tag{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.sec-title{font-family:var(--serif);font-size:22px;color:var(--warm);font-weight:400;margin-bottom:4px}
+.sec-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+
+/* CARDS */
+.card{background:#fff;margin:2px 0;padding:16px 20px;border-left:3px solid transparent;transition:border-color .2s}
+.card:nth-child(odd){border-left-color:var(--gold)}
+.card:nth-child(even){border-left-color:var(--teal)}
+.card.error{border:1px solid var(--rose);border-left:3px solid var(--rose);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.q-num{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.q-label{font-size:14px;font-weight:600;color:var(--warm);margin-bottom:3px;line-height:1.4}
+.q-hint{font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;line-height:1.5}
+.q-error{font-size:10px;color:var(--rose);margin-top:6px;display:none;font-weight:600}
+
+/* INPUTS */
+input[type=text],input[type=number],textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--warm);background:var(--cream);outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:var(--gold)}
+input::placeholder,textarea::placeholder{color:#C0B8A8;font-weight:300;font-size:13px}
+input.invalid,textarea.invalid{border-color:var(--rose)}
+textarea{resize:none;min-height:56px;line-height:1.6;font-size:13px}
+
+/* PILLS */
+.opts{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+.opt{padding:9px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--cream);font-size:12px;font-weight:500;color:var(--warm);cursor:pointer;transition:all .18s;line-height:1.3;text-align:center}
+.opt:active{transform:scale(.95)}
+.opt.sel{background:var(--warm);color:var(--gold-lt);border-color:var(--warm)}
+
+/* STEPPER */
+.stepper{display:flex;align-items:center;gap:0;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;width:fit-content}
+.step-btn{width:44px;height:44px;border:none;background:var(--cream);color:var(--warm);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.step-btn:active{background:var(--border)}
+.step-val{min-width:52px;text-align:center;font-size:18px;font-weight:700;color:var(--warm);font-family:var(--serif);background:#fff;padding:0 8px;line-height:44px}
+
+/* PERSON BUILDER */
+.person-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.person-item{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:12px;position:relative}
+.person-rm{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;background:rgba(122,32,32,.1);border:none;color:var(--rose);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.person-row{display:flex;gap:8px;margin-bottom:8px}
+.person-row:last-child{margin:0}
+.person-row input{flex:1}
+.pi-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px}
+.add-btn{width:100%;padding:11px;border:1.5px dashed var(--border);border-radius:10px;background:transparent;font-family:var(--sans);font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s;margin-top:4px}
+.add-btn:active{border-color:var(--gold);color:var(--gold)}
+
+/* VEHICLES */
+.vehicle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:2px}
+.veh-item{display:flex;flex-direction:column;align-items:center;gap:6px}
+.veh-icon{font-size:24px}
+.veh-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* NAV */
+.nav-wrap{position:fixed;bottom:0;left:0;right:0;background:linear-gradient(transparent 0%,var(--bg) 35%);padding:20px 20px 24px;display:flex;gap:10px;z-index:20}
+.nav-btn{flex:1;padding:15px;border:none;border-radius:12px;font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.nav-btn:active{transform:scale(.97)}
+.nb-back{background:rgba(0,0,0,.07);color:var(--warm)}
+.nb-next{background:var(--warm);color:var(--gold-lt);box-shadow:0 4px 20px rgba(28,20,16,.25)}
+.nb-finish{background:linear-gradient(135deg,var(--teal),#0D4030);color:#fff;box-shadow:0 4px 20px rgba(26,95,80,.4)}
+.nav-btn:disabled{opacity:.4;pointer-events:none}
+
+/* SUMMARY */
+.summ-block{background:#fff;border-radius:12px;margin:10px 16px;overflow:hidden;border:1px solid var(--border)}
+.summ-head{background:var(--warm);color:var(--gold-lt);padding:10px 16px;font-family:var(--serif);font-size:14px;font-style:italic}
+.summ-row{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--bg);font-size:12px}
+.summ-row:last-child{border:none}
+.sk{color:var(--muted)}.sv{font-weight:600;color:var(--warm);text-align:right;max-width:55%;line-height:1.4}
+
+/* EXPORT */
+.export-box{margin:12px 16px;background:#fff;border-radius:14px;padding:20px;text-align:center;border:1px solid var(--border)}
+.exp-title{font-family:var(--serif);font-size:20px;color:var(--warm);margin-bottom:4px}
+.exp-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.exp-code{background:var(--warm);color:var(--gold-lt);padding:12px;border-radius:8px;font-family:monospace;font-size:10px;word-break:break-all;margin-bottom:14px;text-align:left;max-height:72px;overflow:hidden}
+.exp-btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px;transition:all .2s;letter-spacing:.3px}
+.exp-btn:active{transform:scale(.97)}
+.eb-copy{background:var(--warm);color:var(--gold-lt)}
+.eb-json{background:linear-gradient(135deg,var(--teal),#0D4030);color:#fff}
+.eb-wa{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff}
+.eb-print{background:linear-gradient(135deg,var(--slate),#0F1F35);color:#fff}
+.eb-send{background:linear-gradient(135deg,var(--teal),#0A3020);color:#fff}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:10px 22px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.err{background:var(--rose)}
+
+/* SPINNER */
+.spinner{display:none;width:20px;height:20px;border:2px solid rgba(255,255,255,.3);border-top:2px solid #fff;border-radius:50%;animation:spin .6s linear infinite;margin-left:8px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* PRINT */
+@media print{body{background:#fff;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}.nav-wrap,.hdr,.lang-bar,.pw-overlay,.export-box{display:none!important}.scroll{overflow:visible;padding:0}.card,.summ-block{break-inside:avoid;border:1px solid #ddd;background:#fff;margin:4px 0;padding:10px}.summ-head{background:#1C1410!important;color:#E8D080!important}.sec:not(.active){display:none!important}.sec.active{display:block!important}}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div class="pw-overlay" id="pwGate">
+  <div class="pw-card">
+    <div class="pw-icon">🏡</div>
+    <div class="pw-title" data-lang="pw_title">Accesso Protetto</div>
+    <div class="pw-sub" data-lang="pw_sub">Inserisci il codice di accesso fornito dal tuo consulente</div>
+    <input type="password" class="pw-input" id="pwInput" placeholder="••••••" maxlength="12" autocomplete="off">
+    <div class="pw-error" id="pwError" data-lang="pw_error">Codice non valido. Riprova.</div>
+    <button class="pw-btn" onclick="checkPassword()" data-lang="pw_btn">Accedi</button>
+    <div class="pw-hint" data-lang="pw_hint">Codice predefinito: <strong>1234</strong></div>
+  </div>
+</div>
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar" id="langBar" style="display:none">
+  <button class="lang-btn active" onclick="setLang('it')">🇮🇹 IT</button>
+  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn" onclick="setLang('de')">🇩🇪 DE</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr" id="mainUI" style="display:none">
+  <div class="hdr-top">
+    <div class="hdr-brand" data-lang="hdr_brand">Analisi Familiare</div>
+    <div class="hdr-title" data-lang="hdr_title">La Tua Famiglia</div>
+    <div class="hdr-action" onclick="showSummary()" data-lang="hdr_summary">Riepilogo</div>
+  </div>
+  <div class="sec-tabs" id="secTabs"></div>
+  <div class="prog">
+    <div class="prog-bar"><div class="prog-fill" id="pFill" style="width:0%"></div></div>
+    <div class="prog-meta"><span id="pSec">Sezione 1 di 9</span><span id="pPct">0%</span></div>
+  </div>
+</div>
+
+<!-- SCROLL -->
+<div class="scroll" id="scrollArea" style="display:none">
+
+<!-- SEZ 1: CHI SIETE -->
+<div class="sec active" id="s1">
+<div class="sec-head"><div class="sec-tag">01 / 09</div><div class="sec-title" data-lang="s1_title">Chi siete</div><div class="sec-sub" data-lang="s1_sub">Partiamo dalle persone — poi arriveremo ai numeri.</div></div>
+<div class="card"><div class="q-num">01</div><div class="q-label" data-lang="q01">Il tuo nome</div><input type="text" id="q_nome" placeholder="Nome e cognome" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card"><div class="q-num">02</div><div class="q-label" data-lang="q02">Quanti anni hai?</div><input type="number" id="q_eta" placeholder="Es. 42" inputmode="numeric" min="18" max="90" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card"><div class="q-num">03</div><div class="q-label" data-lang="q03">Sei in coppia?</div><div class="opts" id="opt_coppia"><div class="opt" onclick="sel(this,'q_coppia','Sì')">Sì</div><div class="opt" onclick="sel(this,'q_coppia','No')">No</div></div><input type="hidden" id="q_coppia" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card" id="card_unione" style="display:none"><div class="q-num">04</div><div class="q-label" data-lang="q04">Tipo di unione</div><div class="opts" id="opt_unione"><div class="opt" onclick="sel(this,'q_unione','Matrimonio religioso')">⛪ Religioso</div><div class="opt" onclick="sel(this,'q_unione','Matrimonio civile')">🏛️ Civile</div><div class="opt" onclick="sel(this,'q_unione','Unione civile')">🤝 Unione civile</div><div class="opt" onclick="sel(this,'q_unione','Convivenza di fatto')">🏠 Convivenza</div><div class="opt" onclick="sel(this,'q_unione','Fidanzati')">💍 Fidanzati</div></div><input type="hidden" id="q_unione"></div>
+<div class="card" id="card_partner" style="display:none"><div class="q-num">05</div><div class="q-label" data-lang="q05">Nome del/la partner</div><div class="q-hint" data-lang="q05_hint">Lo usiamo nel report — rende tutto più personale</div><input type="text" id="q_partner_nome" placeholder="Nome"></div>
+<div class="card" id="card_partner_eta" style="display:none"><div class="q-num">06</div><div class="q-label" data-lang="q06">Età del/la partner</div><input type="number" id="q_partner_eta" placeholder="Es. 39" inputmode="numeric" min="18" max="90"></div>
+<div class="card" id="card_partner_lavoro" style="display:none"><div class="q-num">07</div><div class="q-label" data-lang="q07">Il/la partner lavora?</div><div class="opts" id="opt_partner_lavora"><div class="opt" onclick="sel(this,'q_partner_lavora','Sì, tempo pieno')">✅ Tempo pieno</div><div class="opt" onclick="sel(this,'q_partner_lavora','Sì, part-time')">🕐 Part-time</div><div class="opt" onclick="sel(this,'q_partner_lavora','No')">❌ Non lavora</div><div class="opt" onclick="sel(this,'q_partner_lavora','Pensionato/a')">🌅 Pensionato/a</div></div><input type="hidden" id="q_partner_lavora"></div>
+</div>
+
+<!-- SEZ 2: I FIGLI -->
+<div class="sec" id="s2">
+<div class="sec-head"><div class="sec-tag">02 / 09</div><div class="sec-title" data-lang="s2_title">I figli</div><div class="sec-sub" data-lang="s2_sub">Ogni figlio ha esigenze diverse a seconda dell'età.</div></div>
+<div class="card"><div class="q-num">08</div><div class="q-label" data-lang="q08">Hai figli?</div><div class="opts" id="opt_figli_si"><div class="opt" onclick="sel(this,'q_figli_si','Sì');showFigliBuilder()">Sì</div><div class="opt" onclick="sel(this,'q_figli_si','No');hideFigliBuilder()">No</div><div class="opt" onclick="sel(this,'q_figli_si','In arrivo');hideFigliBuilder()">In arrivo 🍼</div></div><input type="hidden" id="q_figli_si" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card" id="card_figli_builder" style="display:none"><div class="q-num">09</div><div class="q-label" data-lang="q09">I tuoi figli</div><div class="q-hint" data-lang="q09_hint">Nome ed età per ciascuno — aggiungi quanti ne hai</div><div class="person-list" id="figliList"></div><button class="add-btn" onclick="addFiglio()">+ Aggiungi figlio/a</button></div>
+<div class="card" id="card_figli_futuri" style="display:none"><div class="q-num">10</div><div class="q-label" data-lang="q10">Pensate ad altri figli in futuro?</div><div class="opts" id="opt_figli_futuri"><div class="opt" onclick="sel(this,'q_figli_futuri','Sì, probabilmente')">Sì</div><div class="opt" onclick="sel(this,'q_figli_futuri','Forse')">Forse</div><div class="opt" onclick="sel(this,'q_figli_futuri','No')">No</div></div><input type="hidden" id="q_figli_futuri"></div>
+<div class="card"><div class="q-num">11</div><div class="q-label" data-lang="q11">Previsione scolastica/universitaria</div><div class="opts" id="opt_scuola"><div class="opt" onclick="sel(this,'q_scuola','Solo scuola pubblica')">🏫 Scuola pubblica</div><div class="opt" onclick="sel(this,'q_scuola','Scuola privata')">🎓 Privata</div><div class="opt" onclick="sel(this,'q_scuola','Università in sede')">📚 Univ. in sede</div><div class="opt" onclick="sel(this,'q_scuola','Università fuori sede')">🏠 Fuori sede</div><div class="opt" onclick="sel(this,'q_scuola','Master/estero')">🌍 Master/estero</div><div class="opt" onclick="sel(this,'q_scuola','Non prevista')">Non prevista</div></div><input type="hidden" id="q_scuola"></div>
+</div>
+
+<!-- SEZ 3: RESPONSABILITÀ -->
+<div class="sec" id="s3">
+<div class="sec-head"><div class="sec-tag">03 / 09</div><div class="sec-title" data-lang="s3_title">Le tue responsabilità</div><div class="sec-sub" data-lang="s3_sub">Chi senti di dover proteggere, anche fuori dalla tua famiglia.</div></div>
+<div class="card"><div class="q-num">12</div><div class="q-label" data-lang="q12">I tuoi genitori sono ancora in vita?</div><div class="opts" id="opt_genitori"><div class="opt" onclick="sel(this,'q_genitori','Entrambi')">Entrambi</div><div class="opt" onclick="sel(this,'q_genitori','Solo padre')">Solo padre</div><div class="opt" onclick="sel(this,'q_genitori','Solo madre')">Solo madre</div><div class="opt" onclick="sel(this,'q_genitori','No')">No</div></div><input type="hidden" id="q_genitori"></div>
+<div class="card"><div class="q-num">13</div><div class="q-label" data-lang="q13">I tuoi genitori sono autonomi?</div><div class="opts" id="opt_genitori_aut"><div class="opt" onclick="sel(this,'q_genitori_aut','Completamente autonomi')">✅ Autonomi</div><div class="opt" onclick="sel(this,'q_genitori_aut','Parzialmente dipendenti')">🤝 Parziali</div><div class="opt" onclick="sel(this,'q_genitori_aut','Dipendono da me')">🏠 Dipendono da me</div><div class="opt" onclick="sel(this,'q_genitori_aut','Non applicabile')">—</div></div><input type="hidden" id="q_genitori_aut"></div>
+<div class="card"><div class="q-num">14</div><div class="q-label" data-lang="q14">Contribuisci economicamente ai tuoi genitori?</div><div class="opts" id="opt_gen_aiuto_si"><div class="opt" onclick="sel(this,'q_gen_aiuto_si','Sì')">Sì</div><div class="opt" onclick="sel(this,'q_gen_aiuto_si','No')">No</div><div class="opt" onclick="sel(this,'q_gen_aiuto_si','Occasionalmente')">Occasionalmente</div></div><input type="hidden" id="q_gen_aiuto_si"></div>
+<div class="card"><div class="q-num">15</div><div class="q-label" data-lang="q15">Importo mensile per i genitori (€)</div><div class="q-hint" data-lang="q15_hint">Media mensile — scrivi 0 se non applicabile</div><input type="number" id="q_gen_aiuto" placeholder="Es. 300" inputmode="numeric"></div>
+<div class="card"><div class="q-num">16</div><div class="q-label" data-lang="q16">Hai altre persone di cui ti senti responsabile?</div><div class="q-hint" data-lang="q16_hint">Fratelli, nipoti, ex coniuge, persone con disabilità, amici in difficoltà…</div><div class="opts" id="opt_altri_resp"><div class="opt" onclick="sel(this,'q_altri_resp','Sì')">Sì</div><div class="opt" onclick="sel(this,'q_altri_resp','No')">No</div></div><input type="hidden" id="q_altri_resp"></div>
+<div class="card"><div class="q-num">17</div><div class="q-label" data-lang="q17">Descrivi brevemente (opzionale)</div><textarea id="q_altri_desc" placeholder="Es. Mia sorella con disabilità, contribuisco €200/mese…"></textarea></div>
+<div class="card"><div class="q-num">18</div><div class="q-label" data-lang="q18">Hai obblighi da accordo di separazione / divorzio?</div><div class="opts" id="opt_separaz"><div class="opt" onclick="sel(this,'q_separaz','Sì, assegno mantenimento')">Assegno mantenim.</div><div class="opt" onclick="sel(this,'q_separaz','Sì, mantenimento figli')">Figli</div><div class="opt" onclick="sel(this,'q_separaz','No')">No</div></div><input type="hidden" id="q_separaz"></div>
+</div>
+
+<!-- SEZ 4: VITA QUOTIDIANA -->
+<div class="sec" id="s4">
+<div class="sec-head"><div class="sec-tag">04 / 09</div><div class="sec-title" data-lang="s4_title">La vita di tutti i giorni</div><div class="sec-sub" data-lang="s4_sub">I dettagli che raccontano il tuo stile di vita reale.</div></div>
+<div class="card"><div class="q-num">19</div><div class="q-label" data-lang="q19">Avete animali domestici?</div><div class="opts" id="opt_animali"><div class="opt" onclick="sel(this,'q_animali','No')">No</div><div class="opt" onclick="sel(this,'q_animali','1 cane')">🐕 1 cane</div><div class="opt" onclick="sel(this,'q_animali','2+ cani')">🐕🐕 2+ cani</div><div class="opt" onclick="sel(this,'q_animali','1 gatto')">🐈 1 gatto</div><div class="opt" onclick="sel(this,'q_animali','2+ gatti')">🐈🐈 2+ gatti</div><div class="opt" onclick="sel(this,'q_animali','Cane e gatto')">🐕🐈 Entrambi</div><div class="opt" onclick="sel(this,'q_animali','Altro')">Altro</div></div><input type="hidden" id="q_animali"></div>
+<div class="card"><div class="q-num">20</div><div class="q-label" data-lang="q20">Costo mensile animali stimato (€)</div><div class="q-hint" data-lang="q20_hint">Cibo, veterinario, assicurazione, pensione…</div><input type="number" id="q_animali_costo" placeholder="Es. 120" inputmode="numeric"></div>
+<div class="card"><div class="q-num">21</div><div class="q-label" data-lang="q21">Veicoli di famiglia</div><div class="vehicle-grid"><div class="veh-item"><div class="veh-icon">🚗</div><div class="veh-label">Auto</div><div class="stepper"><button class="step-btn" onclick="stepAdj('q_auto',-1)">−</button><div class="step-val" id="d_auto">0</div><button class="step-btn" onclick="stepAdj('q_auto',1)">+</button></div></div><div class="veh-item"><div class="veh-icon">🏍️</div><div class="veh-label">Moto</div><div class="stepper"><button class="step-btn" onclick="stepAdj('q_moto',-1)">−</button><div class="step-val" id="d_moto">0</div><button class="step-btn" onclick="stepAdj('q_moto',1)">+</button></div></div><div class="veh-item"><div class="veh-icon">🚲</div><div class="veh-label">Bici/e-bike</div><div class="stepper"><button class="step-btn" onclick="stepAdj('q_bici',-1)">−</button><div class="step-val" id="d_bici">0</div><button class="step-btn" onclick="stepAdj('q_bici',1)">+</button></div></div></div><input type="hidden" id="q_auto" value="0"><input type="hidden" id="q_moto" value="0"><input type="hidden" id="q_bici" value="0"></div>
+<div class="card"><div class="q-num">22</div><div class="q-label" data-lang="q22">Le vacanze della famiglia</div><div class="opts" id="opt_vacanze"><div class="opt" onclick="sel(this,'q_vacanze','Nessuna vacanza')">Nessuna</div><div class="opt" onclick="sel(this,'q_vacanze','Brevi in Italia')">🇮🇹 Italia breve</div><div class="opt" onclick="sel(this,'q_vacanze','Lungo in Italia')">🇮🇹 Italia lungo</div><div class="opt" onclick="sel(this,'q_vacanze','Europa')">🌍 Europa</div><div class="opt" onclick="sel(this,'q_vacanze','Lungo raggio')">✈️ Lungo raggio</div><div class="opt" onclick="sel(this,'q_vacanze','Mix Europa e lungo raggio')">✈️🌍 Mix</div></div><input type="hidden" id="q_vacanze"></div>
+<div class="card"><div class="q-num">23</div><div class="q-label" data-lang="q23">Spesa media vacanze all'anno (€)</div><input type="number" id="q_vacanze_spesa" placeholder="Es. 4000" inputmode="numeric"></div>
+</div>
+
+<!-- SEZ 5: REDDITO E PROFESSIONE -->
+<div class="sec" id="s5">
+<div class="sec-head"><div class="sec-tag">05 / 09</div><div class="sec-title" data-lang="s5_title">Reddito e lavoro</div><div class="sec-sub" data-lang="s5_sub">La base su cui costruiamo tutto il resto.</div></div>
+<div class="card"><div class="q-num">24</div><div class="q-label" data-lang="q24">Categoria professionale</div><div class="opts" id="opt_categ"><div class="opt" onclick="sel(this,'q_categ','Dipendente privato')">Dip. privato</div><div class="opt" onclick="sel(this,'q_categ','Dipendente pubblico')">Dip. pubblico</div><div class="opt" onclick="sel(this,'q_categ','Avvocato')">⚖️ Avvocato</div><div class="opt" onclick="sel(this,'q_categ','Medico/Dentista')">🩺 Medico</div><div class="opt" onclick="sel(this,'q_categ','Ingegnere/Architetto')">📐 Ing./Arch.</div><div class="opt" onclick="sel(this,'q_categ','Commercialista')">📊 Commercialista</div><div class="opt" onclick="sel(this,'q_categ','Geometra')">📏 Geometra</div><div class="opt" onclick="sel(this,'q_categ','Artigiano/Commerciante')">🔧 Artigiano/Comm.</div><div class="opt" onclick="sel(this,'q_categ','Libero professionista (altra)')">💼 Altro prof.</div><div class="opt" onclick="sel(this,'q_categ','Imprenditore')">🏢 Imprenditore</div><div class="opt" onclick="sel(this,'q_categ','Pensionato')">🌅 Pensionato</div></div><input type="hidden" id="q_categ" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card"><div class="q-num">25</div><div class="q-label" data-lang="q25">Reddito netto mensile tuo (€)</div><input type="number" id="q_reddito" placeholder="Es. 2800" inputmode="numeric" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card" id="card_reddito_partner" style="display:none"><div class="q-num">26</div><div class="q-label" data-lang="q26">Reddito netto mensile partner (€)</div><div class="q-hint" data-lang="q26_hint">0 se non lavora</div><input type="number" id="q_reddito_partner" placeholder="Es. 1200" inputmode="numeric"></div>
+<div class="card"><div class="q-num">27</div><div class="q-label" data-lang="q27">Stabilità del reddito</div><div class="opts" id="opt_stabilita"><div class="opt" onclick="sel(this,'q_stabilita','Molto stabile')">🟢 Molto stabile</div><div class="opt" onclick="sel(this,'q_stabilita','Abbastanza stabile')">🟡 Abbastanza</div><div class="opt" onclick="sel(this,'q_stabilita','Variabile')">🟠 Variabile</div><div class="opt" onclick="sel(this,'q_stabilita','Molto variabile')">🔴 Molto variabile</div></div><input type="hidden" id="q_stabilita"></div>
+<div class="card"><div class="q-num">28</div><div class="q-label" data-lang="q28">Età di pensionamento prevista</div><input type="number" id="q_eta_pens" placeholder="Es. 67" inputmode="numeric" min="55" max="80"></div>
+<div class="card"><div class="q-num">29</div><div class="q-label" data-lang="q29">Pensione mensile attesa (€)</div><div class="q-hint" data-lang="q29_hint">Stima INPS o cassa professionale</div><input type="number" id="q_pensione" placeholder="Es. 1400" inputmode="numeric"></div>
+</div>
+
+<!-- SEZ 6: PATRIMONIO ATTUALE -->
+<div class="sec" id="s6">
+<div class="sec-head"><div class="sec-tag">06 / 09</div><div class="sec-title" data-lang="s6_title">Quello che hai già</div><div class="sec-sub" data-lang="s6_sub">Proprietà, risparmi, debiti. Il punto di partenza.</div></div>
+<div class="card"><div class="q-num">30</div><div class="q-label" data-lang="q30">Casa di residenza</div><div class="opts" id="opt_casa"><div class="opt" onclick="sel(this,'q_casa','Proprietà (con mutuo)')">🏠 Proprietà + mutuo</div><div class="opt" onclick="sel(this,'q_casa','Proprietà (libera)')">🏠 Proprietà libera</div><div class="opt" onclick="sel(this,'q_casa','Affitto')">🔑 Affitto</div><div class="opt" onclick="sel(this,'q_casa','Casa dei genitori')">👨‍👩‍👧 Casa genitori</div></div><input type="hidden" id="q_casa" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card"><div class="q-num">31</div><div class="q-label" data-lang="q31">Altre proprietà immobiliari</div><div class="q-hint" data-lang="q31_hint">Casa vacanze, box, terreni, immobili affittati…</div><div class="opts" id="opt_altri_imm"><div class="opt" onclick="sel(this,'q_altri_imm','No')">No</div><div class="opt" onclick="sel(this,'q_altri_imm','Sì, uso personale')">Sì, uso personale</div><div class="opt" onclick="sel(this,'q_altri_imm','Sì, reddito da affitto')">Sì, affittata</div><div class="opt" onclick="sel(this,'q_altri_imm','Più immobili')">Più immobili</div></div><input type="hidden" id="q_altri_imm"></div>
+<div class="card"><div class="q-num">32</div><div class="q-label" data-lang="q32">Valore totale immobili di proprietà (€)</div><div class="q-hint" data-lang="q32_hint">Stima di mercato — scrivi 0 se in affitto</div><input type="number" id="q_immobile" placeholder="Es. 250000" inputmode="numeric"></div>
+<div class="card"><div class="q-num">33</div><div class="q-label" data-lang="q33">Risparmi e investimenti (€)</div><div class="q-hint" data-lang="q33_hint">Conti correnti, depositi, fondi, azioni, polizze…</div><input type="number" id="q_risparmi" placeholder="Es. 45000" inputmode="numeric" data-validate="required"><div class="q-error" data-lang="val_required">Campo obbligatorio</div></div>
+<div class="card"><div class="q-num">34</div><div class="q-label" data-lang="q34">Tipo di risparmi prevalente</div><div class="opts" id="opt_risp_tipo"><div class="opt" onclick="sel(this,'q_risp_tipo','Solo conto corrente')">🏦 Solo CC</div><div class="opt" onclick="sel(this,'q_risp_tipo','Conto + deposito')">📦 CC + deposito</div><div class="opt" onclick="sel(this,'q_risp_tipo','Fondi/ETF')">📈 Fondi/ETF</div><div class="opt" onclick="sel(this,'q_risp_tipo','Mix diversificato')">⚖️ Mix</div><div class="opt" onclick="sel(this,'q_risp_tipo','Polizze vita')">🛡️ Polizze vita</div></div><input type="hidden" id="q_risp_tipo"></div>
+<div class="card"><div class="q-num">35</div><div class="q-label" data-lang="q35">Debiti totali (€)</div><div class="q-hint" data-lang="q35_hint">Mutuo residuo + prestiti + leasing + carte</div><input type="number" id="q_debiti" placeholder="Es. 95000" inputmode="numeric"></div>
+<div class="card"><div class="q-num">36</div><div class="q-label" data-lang="q36">Rata mensile totale sui debiti (€)</div><input type="number" id="q_rata" placeholder="Es. 750" inputmode="numeric"></div>
+<div class="card"><div class="q-num">37</div><div class="q-label" data-lang="q37">Anni residui per estinguere i debiti</div><input type="number" id="q_anni_deb" placeholder="Es. 18" inputmode="numeric" min="0" max="40"></div>
+</div>
+
+<!-- SEZ 7: BENI IN PERVENIMENTO -->
+<div class="sec" id="s7">
+<div class="sec-head"><div class="sec-tag">07 / 09</div><div class="sec-title" data-lang="s7_title">Quello che arriverà</div><div class="sec-sub" data-lang="s7_sub">Eredità, donazioni, liquidazioni, vendite previste. Il futuro cambia i calcoli.</div></div>
+<div class="card"><div class="q-num">38</div><div class="q-label" data-lang="q38">Prevedi di ricevere un'eredità?</div><div class="opts" id="opt_eredita"><div class="opt" onclick="sel(this,'q_eredita','Sì, probabile')">Sì, probabile</div><div class="opt" onclick="sel(this,'q_eredita','Sì, certa')">Sì, certa</div><div class="opt" onclick="sel(this,'q_eredita','Forse')">Forse</div><div class="opt" onclick="sel(this,'q_eredita','No')">No</div></div><input type="hidden" id="q_eredita"></div>
+<div class="card"><div class="q-num">39</div><div class="q-label" data-lang="q39">Valore stimato dell'eredità (€)</div><div class="q-hint" data-lang="q39_hint">Stima approssimativa — scrivi 0 se non applicabile</div><input type="number" id="q_eredita_val" placeholder="Es. 200000" inputmode="numeric"></div>
+<div class="card"><div class="q-num">40</div><div class="q-label" data-lang="q40">Di cosa si tratta prevalentemente?</div><div class="opts" id="opt_eredita_tipo"><div class="opt" onclick="sel(this,'q_eredita_tipo','Immobili')">🏠 Immobili</div><div class="opt" onclick="sel(this,'q_eredita_tipo','Liquidità')">💰 Liquidità</div><div class="opt" onclick="sel(this,'q_eredita_tipo','Azienda/quote')">🏢 Azienda</div><div class="opt" onclick="sel(this,'q_eredita_tipo','Mix')">⚖️ Mix</div><div class="opt" onclick="sel(this,'q_eredita_tipo','Non applicabile')">—</div></div><input type="hidden" id="q_eredita_tipo"></div>
+<div class="card"><div class="q-num">41</div><div class="q-label" data-lang="q41">Prevedi altri beni in entrata nei prossimi 10 anni?</div><div class="q-hint" data-lang="q41_hint">Vendita immobile, liquidazione TFR, buonuscita, rimborsi, donazioni…</div><div class="opts" id="opt_altri_beni"><div class="opt" onclick="sel(this,'q_altri_beni','Sì')">Sì</div><div class="opt" onclick="sel(this,'q_altri_beni','No')">No</div><div class="opt" onclick="sel(this,'q_altri_beni','Forse')">Forse</div></div><input type="hidden" id="q_altri_beni"></div>
+<div class="card"><div class="q-num">42</div><div class="q-label" data-lang="q42">Descrivi brevemente (opzionale)</div><textarea id="q_altri_beni_desc" placeholder="Es. Vendo casa al mare entro 5 anni, stima 180.000€…"></textarea></div>
+<div class="card"><div class="q-num">43</div><div class="q-label" data-lang="q43">Hai già pianificato cosa lascerai ai tuoi eredi?</div><div class="opts" id="opt_testamento"><div class="opt" onclick="sel(this,'q_testamento','Sì, testamento redatto')">✅ Testamento</div><div class="opt" onclick="sel(this,'q_testamento','Sì, ma informalmente')">📝 Informale</div><div class="opt" onclick="sel(this,'q_testamento','No, ma ci penso')">💭 Ci penso</div><div class="opt" onclick="sel(this,'q_testamento','No')">No</div></div><input type="hidden" id="q_testamento"></div>
+</div>
+
+<!-- SEZ 8: SPESE E PENSIONE -->
+<div class="sec" id="s8">
+<div class="sec-head"><div class="sec-tag">08 / 09</div><div class="sec-title" data-lang="s8_title">Spese e previdenza</div><div class="sec-sub" data-lang="s8_sub">Come distribuisci il reddito ogni mese.</div></div>
+<div class="card"><div class="q-num">44</div><div class="q-label" data-lang="q44">Spese mensili casa (affitto o mutuo incluso) (€)</div><input type="number" id="q_sp_casa" placeholder="Es. 900" inputmode="numeric"></div>
+<div class="card"><div class="q-num">45</div><div class="q-label" data-lang="q45">Spese quotidiane (cibo, trasporti, utenze) (€)</div><input type="number" id="q_sp_quotidiano" placeholder="Es. 1000" inputmode="numeric"></div>
+<div class="card"><div class="q-num">46</div><div class="q-label" data-lang="q46">Spese per i figli / istruzione (€)</div><input type="number" id="q_sp_figli" placeholder="Es. 400" inputmode="numeric"></div>
+<div class="card"><div class="q-num">47</div><div class="q-label" data-lang="q47">Spese salute e prevenzione (€)</div><input type="number" id="q_sp_salute" placeholder="Es. 150" inputmode="numeric"></div>
+<div class="card"><div class="q-num">48</div><div class="q-label" data-lang="q48">Svago, sport, abbonamenti (€)</div><input type="number" id="q_sp_svago" placeholder="Es. 300" inputmode="numeric"></div>
+<div class="card"><div class="q-num">49</div><div class="q-label" data-lang="q49">Hai un fondo pensione integrativo?</div><div class="opts" id="opt_fondo"><div class="opt" onclick="sel(this,'q_fondo','Sì, attivo')">✅ Sì, attivo</div><div class="opt" onclick="sel(this,'q_fondo','Sì, non versando')">⏸️ Attivo, fermo</div><div class="opt" onclick="sel(this,'q_fondo','No')">❌ No</div><div class="opt" onclick="sel(this,'q_fondo','Non so')">🤷 Non so</div></div><input type="hidden" id="q_fondo"></div>
+<div class="card"><div class="q-num">50</div><div class="q-label" data-lang="q50">Contributo mensile fondo pensione (€)</div><input type="number" id="q_contrib" placeholder="Es. 150 — scrivi 0 se non hai" inputmode="numeric"></div>
+<div class="card"><div class="q-num">51</div><div class="q-label" data-lang="q51">Aspettativa di vita stimata</div><div class="opts" id="opt_aspett"><div class="opt" onclick="sel(this,'q_aspett','80')">80 anni</div><div class="opt sel" onclick="sel(this,'q_aspett','85')">85 anni</div><div class="opt" onclick="sel(this,'q_aspett','90')">90 anni</div><div class="opt" onclick="sel(this,'q_aspett','95')">95 anni</div></div><input type="hidden" id="q_aspett" value="85"></div>
+</div>
+
+<!-- SEZ 9: SOGNI E OBIETTIVI -->
+<div class="sec" id="s9">
+<div class="sec-head"><div class="sec-tag">09 / 09</div><div class="sec-title" data-lang="s9_title">I vostri sogni</div><div class="sec-sub" data-lang="s9_sub">La parte più importante. I numeri servono a proteggere questo.</div></div>
+<div class="card"><div class="q-num">52</div><div class="q-label" data-lang="q52">Obiettivo patrimoniale al pensionamento (€)</div><div class="q-hint" data-lang="q52_hint">Quanto vorreste avere accumulato?</div><input type="number" id="q_obiettivo" placeholder="Es. 300000" inputmode="numeric"></div>
+<div class="card"><div class="q-num">53</div><div class="q-label" data-lang="q53">Profilo di rischio negli investimenti</div><div class="opts" id="opt_rischio"><div class="opt" onclick="sel(this,'q_rischio','Conservativo')">🛡️ Conservativo</div><div class="opt" onclick="sel(this,'q_rischio','Prudente')">⚖️ Prudente</div><div class="opt" onclick="sel(this,'q_rischio','Bilanciato')">📊 Bilanciato</div><div class="opt" onclick="sel(this,'q_rischio','Dinamico')">🚀 Dinamico</div></div><input type="hidden" id="q_rischio"></div>
+<div class="card"><div class="q-num">54</div><div class="q-label" data-lang="q54">Il tuo sogno per il/la partner</div><div class="q-hint" data-lang="q54_hint">Cosa vorresti garantirgli/le se non ci fossi più?</div><textarea id="q_dream_partner" placeholder="Es. Che non debba lavorare dopo i 60 anni da sola…"></textarea></div>
+<div class="card"><div class="q-num">55</div><div class="q-label" data-lang="q55">Il tuo sogno per i figli</div><textarea id="q_dream_figli" placeholder="Es. Che possano studiare quello che vogliono…"></textarea></div>
+<div class="card"><div class="q-num">56</div><div class="q-label" data-lang="q56">Il tuo sogno per te stesso</div><textarea id="q_dream_se" placeholder="Es. Restare autonomo, non pesare sui miei figli…"></textarea></div>
+<div class="card"><div class="q-num">57</div><div class="q-label" data-lang="q57">C'è qualcosa di importante che non abbiamo chiesto?</div><textarea id="q_note" placeholder="Ogni dettaglio può cambiare il piano…"></textarea></div>
+</div>
+
+<!-- RIEPILOGO -->
+<div class="sec" id="sSumm">
+<div class="sec-head" style="padding-top:12px"><div class="sec-tag">Riepilogo completo</div><div class="sec-title" id="summ_title">La tua famiglia</div><div class="sec-sub">Verifica i dati prima di esportare.</div></div>
+<div id="summContent"></div>
+<div class="export-box">
+  <div class="exp-title">✅ Tutto pronto</div>
+  <div class="exp-sub">Copia il codice, scarica, stampa o invia al tuo consulente.</div>
+  <div class="exp-code" id="expCode">Compila le 9 sezioni e torna qui…</div>
+  <button class="exp-btn eb-copy" onclick="copyCode()">📋 Copia codice</button>
+  <button class="exp-btn eb-json" onclick="dlJSON()">⬇️ Scarica .json</button>
+  <button class="exp-btn eb-wa" onclick="sendWA()">📱 Invia su WhatsApp</button>
+  <button class="exp-btn eb-print" onclick="printReport()">🖨️ Stampa report</button>
+  <button class="exp-btn eb-send" onclick="sendToServer()">📤 Invia al server <span class="spinner" id="spinner"></span></button>
+</div>
+</div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap" id="navWrap" style="display:none">
+  <button class="nav-btn nb-back" id="btnBack" onclick="prevSec()" style="display:none">← Indietro</button>
+  <button class="nav-btn nb-next" id="btnNext" onclick="nextSec()">Continua →</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG={password:'1234',apiEndpoint:'/api/submit',multiClient:false};
+const LANG={
+it:{pw_title:'Accesso Protetto',pw_sub:'Inserisci il codice di accesso fornito dal tuo consulente',pw_error:'Codice non valido. Riprova.',pw_btn:'Accedi',pw_hint:'Codice predefinito: <strong>1234</strong>',hdr_brand:'Analisi Familiare',hdr_title:'La Tua Famiglia',hdr_summary:'Riepilogo',s1_title:'Chi siete',s1_sub:'Partiamo dalle persone — poi arriveremo ai numeri.',s2_title:'I figli',s2_sub:'Ogni figlio ha esigenze diverse a seconda dell\'età.',s3_title:'Le tue responsabilità',s3_sub:'Chi senti di dover proteggere, anche fuori dalla tua famiglia.',s4_title:'La vita di tutti i giorni',s4_sub:'I dettagli che raccontano il tuo stile di vita reale.',s5_title:'Reddito e lavoro',s5_sub:'La base su cui costruiamo tutto il resto.',s6_title:'Quello che hai già',s6_sub:'Proprietà, risparmi, debiti. Il punto di partenza.',s7_title:'Quello che arriverà',s7_sub:'Eredità, donazioni, liquidazioni, vendite previste.',s8_title:'Spese e previdenza',s8_sub:'Come distribuisci il reddito ogni mese.',s9_title:'I vostri sogni',s9_sub:'La parte più importante. I numeri servono a proteggere questo.',q01:'Il tuo nome',q02:'Quanti anni hai?',q03:'Sei in coppia?',q04:'Tipo di unione',q05:'Nome del/la partner',q05_hint:'Lo usiamo nel report — rende tutto più personale',q06:'Età del/la partner',q07:'Il/la partner lavora?',q08:'Hai figli?',q09:'I tuoi figli',q09_hint:'Nome ed età per ciascuno — aggiungi quanti ne hai',q10:'Pensate ad altri figli in futuro?',q11:'Previsione scolastica/universitaria',q12:'I tuoi genitori sono ancora in vita?',q13:'I tuoi genitori sono autonomi?',q14:'Contribuisci economicamente ai tuoi genitori?',q15:'Importo mensile per i genitori (€)',q15_hint:'Media mensile — scrivi 0 se non applicabile',q16:'Hai altre persone di cui ti senti responsabile?',q16_hint:'Fratelli, nipoti, ex coniuge, persone con disabilità, amici in difficoltà…',q17:'Descrivi brevemente (opzionale)',q18:'Hai obblighi da accordo di separazione / divorzio?',q19:'Avete animali domestici?',q20:'Costo mensile animali stimato (€)',q20_hint:'Cibo, veterinario, assicurazione, pensione…',q21:'Veicoli di famiglia',q22:'Le vacanze della famiglia',q23:'Spesa media vacanze all\'anno (€)',q24:'Categoria professionale',q25:'Reddito netto mensile tuo (€)',q26:'Reddito netto mensile partner (€)',q26_hint:'0 se non lavora',q27:'Stabilità del reddito',q28:'Età di pensionamento prevista',q29:'Pensione mensile attesa (€)',q29_hint:'Stima INPS o cassa professionale',q30:'Casa di residenza',q31:'Altre proprietà immobiliari',q31_hint:'Casa vacanze, box, terreni, immobili affittati…',q32:'Valore totale immobili di proprietà (€)',q32_hint:'Stima di mercato — scrivi 0 se in affitto',q33:'Risparmi e investimenti (€)',q33_hint:'Conti correnti, depositi, fondi, azioni, polizze…',q34:'Tipo di risparmi prevalente',q35:'Debiti totali (€)',q35_hint:'Mutuo residuo + prestiti + leasing + carte',q36:'Rata mensile totale sui debiti (€)',q37:'Anni residui per estinguere i debiti',q38:'Prevedi di ricevere un\'eredità?',q39:'Valore stimato dell\'eredità (€)',q39_hint:'Stima approssimativa — scrivi 0 se non applicabile',q40:'Di cosa si tratta prevalentemente?',q41:'Prevedi altri beni in entrata nei prossimi 10 anni?',q41_hint:'Vendita immobile, liquidazione TFR, buonuscita, rimborsi, donazioni…',q42:'Descrivi brevemente (opzionale)',q43:'Hai già pianificato cosa lascerai ai tuoi eredi?',q44:'Spese mensili casa (affitto o mutuo incluso) (€)',q45:'Spese quotidiane (cibo, trasporti, utenze) (€)',q46:'Spese per i figli / istruzione (€)',q47:'Spese salute e prevenzione (€)',q48:'Svago, sport, abbonamenti (€)',q49:'Hai un fondo pensione integrativo?',q50:'Contributo mensile fondo pensione (€)',q51:'Aspettativa di vita stimata',q52:'Obiettivo patrimoniale al pensionamento (€)',q52_hint:'Quanto vorreste avere accumulato?',q53:'Profilo di rischio negli investimenti',q54:'Il tuo sogno per il/la partner',q54_hint:'Cosa vorresti garantirgli/le se non ci fossi più?',q55:'Il tuo sogno per i figli',q56:'Il tuo sogno per te stesso',q57:'C\'è qualcosa di importante che non abbiamo chiesto?',val_required:'Campo obbligatorio'},
+en:{pw_title:'Protected Access',pw_sub:'Enter the access code provided by your consultant',pw_error:'Invalid code. Try again.',pw_btn:'Login',pw_hint:'Default code: <strong>1234</strong>',hdr_brand:'Family Analysis',hdr_title:'Your Family',hdr_summary:'Summary',val_required:'Required field'},
+de:{pw_title:'Geschützter Zugang',pw_sub:'Geben Sie den Zugangscode Ihres Beraters ein',pw_error:'Ungültiger Code. Erneut versuchen.',pw_btn:'Anmelden',pw_hint:'Standardcode: <strong>1234</strong>',hdr_brand:'Familienanalyse',hdr_title:'Ihre Familie',hdr_summary:'Zusammenfassung',val_required:'Pflichtfeld'}
+};
+let currentLang='it';
+const SECS=['s1','s2','s3','s4','s5','s6','s7','s8','s9','sSumm'];
+const SEC_NAMES=['Chi siete','I figli','Resp.','Vita','Reddito','Patrimonio','In perv.','Spese','Sogni','Riepilogo'];
+let cur=0,figliData=[],unlocked=false;
+const FIELDS=['q_nome','q_eta','q_coppia','q_unione','q_partner_nome','q_partner_eta','q_partner_lavora','q_figli_si','q_figli_futuri','q_scuola','q_genitori','q_genitori_aut','q_gen_aiuto_si','q_gen_aiuto','q_altri_resp','q_altri_desc','q_separaz','q_animali','q_animali_costo','q_auto','q_moto','q_bici','q_vacanze','q_vacanze_spesa','q_categ','q_reddito','q_reddito_partner','q_stabilita','q_eta_pens','q_pensione','q_casa','q_altri_imm','q_immobile','q_risparmi','q_risp_tipo','q_debiti','q_rata','q_anni_deb','q_eredita','q_eredita_val','q_eredita_tipo','q_altri_beni','q_altri_beni_desc','q_testamento','q_sp_casa','q_sp_quotidiano','q_sp_figli','q_sp_salute','q_sp_svago','q_fondo','q_contrib','q_aspett','q_obiettivo','q_rischio','q_dream_partner','q_dream_figli','q_dream_se','q_note'];
+const REQUIRED=['q_nome','q_eta','q_categ','q_reddito','q_casa','q_risparmi'];
+const CLIENT_ID=CONFIG.multiClient?(new URLSearchParams(window.location.search).get('id')||'default'):'default';
+function storageKey(k){return `${CLIENT_ID}_fam_${k}`;}
+
+// PASSWORD
+function checkPassword(){
+  if(document.getElementById('pwInput').value.trim()===CONFIG.password){
+    unlocked=true;document.getElementById('pwGate').style.display='none';
+    document.getElementById('langBar').style.display='flex';document.getElementById('mainUI').style.display='block';
+    document.getElementById('scrollArea').style.display='block';document.getElementById('navWrap').style.display='flex';
+    buildTabs();restore();renderNav();document.getElementById('pwInput').value='';
+  }else{document.getElementById('pwError').style.display='block';}
+}
+document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword();});
+
+// LINGUA
+function setLang(l){currentLang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.textContent.includes(l.toUpperCase())));document.querySelectorAll('[data-lang]').forEach(el=>{const k=el.dataset.lang;if(LANG[l]&&LANG[l][k])el.innerHTML=LANG[l][k];});localStorage.setItem('fam_lang',l);}
+
+// TABS
+function buildTabs(){document.getElementById('secTabs').innerHTML=SEC_NAMES.map((n,i)=>`<button class="sec-tab${i===0?' on':''}" onclick="goTo(${i})">${n}</button>`).join('');}
+
+// NAVIGATION
+function nextSec(){if(!validateCurrentSec())return;if(cur<SECS.length-1)goTo(cur+1);}
+function prevSec(){if(cur>0)goTo(cur-1);}
+function goTo(i){if(i===SECS.length-1)buildSummary();document.getElementById(SECS[cur]).classList.remove('active');cur=i;document.getElementById(SECS[cur]).classList.add('active');document.getElementById('scrollArea').scrollTop=0;renderNav();updateProgress();document.querySelectorAll('.sec-tab').forEach((t,j)=>t.classList.toggle('on',j===cur));}
+function showSummary(){goTo(SECS.length-1);}
+function renderNav(){const b=document.getElementById('btnBack'),n=document.getElementById('btnNext');b.style.display=cur>0?'block':'none';if(cur===SECS.length-1){n.className='nav-btn nb-next';n.textContent='← Modifica';n.onclick=()=>goTo(0);n.disabled=false;}else if(cur===SECS.length-2){n.className='nav-btn nb-finish';n.textContent='Vedi riepilogo ✓';n.onclick=showSummary;n.disabled=false;}else{n.className='nav-btn nb-next';n.textContent='Continua →';n.onclick=nextSec;n.disabled=false;}}
+function updateProgress(){const p=Math.round(cur/(SECS.length-1)*100);document.getElementById('pFill').style.width=p+'%';document.getElementById('pSec').textContent=cur<SECS.length-1?`Sezione ${cur+1} di ${SECS.length-1}`:'Completato';document.getElementById('pPct').textContent=p+'%';}
+
+// VALIDATION
+function validateCurrentSec(){const s=document.getElementById(SECS[cur]);if(!s)return true;clearErrors(s);let ok=true;s.querySelectorAll('[data-validate="required"]').forEach(el=>{if(!el.value?.trim()){showError(el);ok=false;}});if(!ok)toast('Compila i campi obbligatori','err');return ok;}
+function showError(el){el.classList.add('invalid');const c=el.closest('.card');if(c){c.classList.add('error');setTimeout(()=>c.classList.remove('error'),800);}const e=el.closest('.card')?.querySelector('.q-error');if(e)e.style.display='block';}
+function clearErrors(s){s.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));s.querySelectorAll('.q-error').forEach(e=>e.style.display='none');}
+
+// SELECT
+function sel(el,id,val){el.closest('.opts').querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');const inp=document.getElementById(id);if(inp){inp.value=val;inp.classList.remove('invalid');}const err=el.closest('.card')?.querySelector('.q-error');if(err)err.style.display='none';save(id,val);if(id==='q_coppia'){['card_unione','card_partner','card_partner_eta','card_partner_lavoro','card_reddito_partner'].forEach(c=>{const e=document.getElementById(c);if(e)e.style.display=val==='Sì'?'block':'none';});}if(id==='q_figli_si'){document.getElementById('card_figli_builder').style.display=val==='Sì'?'block':'none';document.getElementById('card_figli_futuri').style.display=val==='Sì'||val==='In arrivo'?'block':'none';}}
+
+// STEPPER
+function stepAdj(id,d){const inp=document.getElementById(id),disp=document.getElementById('d_'+id.replace('q_',''));let v=Math.max(0,Math.min(10,(parseInt(inp.value)||0)+d));inp.value=v;if(disp)disp.textContent=v;save(id,v);}
+
+// FIGLI
+function showFigliBuilder(){document.getElementById('card_figli_builder').style.display='block';if(figliData.length===0)addFiglio();}
+function hideFigliBuilder(){document.getElementById('card_figli_builder').style.display='none';}
+function addFiglio(){figliData.push({nome:'',eta:''});renderFigli();}
+function removeFiglio(i){figliData.splice(i,1);renderFigli();}
+function renderFigli(){document.getElementById('figliList').innerHTML=figliData.map((f,i)=>`<div class="person-item"><button class="person-rm" onclick="removeFiglio(${i})">×</button><div class="person-row"><div style="flex:2"><span class="pi-label">Nome</span><input type="text" value="${f.nome.replace(/"/g,'&quot;')}" placeholder="Es. Lorenzo" oninput="figliData[${i}].nome=this.value;saveFigli()"></div><div style="flex:1"><span class="pi-label">Età</span><input type="number" value="${f.eta}" placeholder="8" inputmode="numeric" min="0" max="30" oninput="figliData[${i}].eta=this.value;saveFigli()"></div></div></div>`).join('');}
+function saveFigli(){localStorage.setItem(storageKey('figli'),JSON.stringify(figliData));}
+
+// PERSIST
+function save(id,val){localStorage.setItem(storageKey(id),val);}
+function gv(id){const el=document.getElementById(id);return el?el.value:'';}
+document.addEventListener('change',e=>{const el=e.target;if(el.id&&FIELDS.includes(el.id)){el.classList.remove('invalid');const err=el.closest('.card')?.querySelector('.q-error');if(err&&el.value.trim())err.style.display='none';save(el.id,el.value);}});
+document.addEventListener('input',e=>{const el=e.target;if(el.id&&FIELDS.includes(el.id)&&el.value.trim()){const err=el.closest('.card')?.querySelector('.q-error');if(err)err.style.display='none';el.classList.remove('invalid');}});
+
+function restore(){
+  FIELDS.forEach(id=>{const v=localStorage.getItem(storageKey(id));if(!v)return;const el=document.getElementById(id);if(el)el.value=v;document.querySelectorAll('.opt').forEach(p=>{if((p.getAttribute('onclick')||'').includes("'"+id+"'")){const m=(p.getAttribute('onclick')||'').match(/'([^']+)','([^']+)'/);if(m&&m[2]===v)p.classList.add('sel');}});if(id==='q_coppia'&&v==='Sì'){['card_unione','card_partner','card_partner_eta','card_partner_lavoro','card_reddito_partner'].forEach(c=>{const e=document.getElementById(c);if(e)e.style.display='block';});}if(id==='q_figli_si'&&v==='Sì')document.getElementById('card_figli_builder').style.display='block';});
+  ['q_auto','q_moto','q_bici'].forEach(id=>{const v=localStorage.getItem(storageKey(id))||'0',inp=document.getElementById(id),disp=document.getElementById('d_'+id.replace('q_',''));if(inp)inp.value=v;if(disp)disp.textContent=v;});
+  const fj=localStorage.getItem(storageKey('figli'));if(fj){try{figliData=JSON.parse(fj);if(figliData.length>0){renderFigli();document.getElementById('card_figli_builder').style.display='block';}}catch(e){}}
+  const sl=localStorage.getItem('fam_lang');if(sl&&LANG[sl])setLang(sl);
+}
+
+// DATA
+function getData(){const d={tipo:'famiglie',data:new Date().toLocaleDateString('it-IT'),ora:new Date().toLocaleTimeString('it-IT'),cliente:CLIENT_ID};FIELDS.forEach(id=>d[id]=gv(id));d.figli=JSON.stringify(figliData);return d;}
+
+// SUMMARY
+function buildSummary(){
+  const d=getData();document.getElementById('summ_title').textContent=d.q_nome||'La tua famiglia';const fmt=v=>v?'€ '+parseInt(v).toLocaleString('it-IT'):'-';
+  const sections=[
+    {title:'👤 Chi siete',rows:[['Nome',d.q_nome],['Età',d.q_eta+' anni'],['Unione',d.q_unione||'—'],['Partner',d.q_partner_nome?`${d.q_partner_nome}, ${d.q_partner_eta} anni`:'—'],['Partner lavora',d.q_partner_lavora||'—']]},
+    {title:'👨‍👩‍👧 Figli',rows:[['Figli',figliData.length>0?figliData.map(f=>`${f.nome} (${f.eta}a)`).join(', '):(d.q_figli_si||'—')],['Scuola',d.q_scuola||'—']]},
+    {title:'🤝 Responsabilità',rows:[['Genitori',d.q_genitori||'—'],['Autonomia',d.q_genitori_aut||'—'],['Aiuto mensile',d.q_gen_aiuto>0?fmt(d.q_gen_aiuto):'-'],['Altro',d.q_altri_desc||d.q_altri_resp||'—'],['Separazione',d.q_separaz||'—']]},
+    {title:'🏠 Vita quotidiana',rows:[['Animali',d.q_animali||'—'],['Veicoli',`🚗${d.q_auto} 🏍️${d.q_moto} 🚲${d.q_bici}`],['Vacanze',d.q_vacanze||'—']]},
+    {title:'💰 Reddito',rows:[['Categoria',d.q_categ||'—'],['Reddito',fmt(d.q_reddito)+'/mese'],['Reddito partner',fmt(d.q_reddito_partner)+'/mese'],['Pensione attesa',fmt(d.q_pensione)+'/mese']]},
+    {title:'🏦 Patrimonio',rows:[['Casa',d.q_casa||'—'],['Immobili',fmt(d.q_immobile)],['Risparmi',fmt(d.q_risparmi)],['Debiti',fmt(d.q_debiti)],['Rata mensile',fmt(d.q_rata)]]},
+    {title:'🎁 In pervenimento',rows:[['Eredità',d.q_eredita||'—'],['Valore',fmt(d.q_eredita_val)],['Testamento',d.q_testamento||'—']]},
+    {title:'🌟 Sogni',rows:[['Partner',d.q_dream_partner||'—'],['Figli',d.q_dream_figli||'—'],['Te stesso',d.q_dream_se||'—'],['Note',d.q_note||'—']]},
+  ];
+  document.getElementById('summContent').innerHTML=sections.map(s=>`<div class="summ-block"><div class="summ-head">${s.title}</div>${s.rows.filter(r=>r[1]&&r[1]!=='—'&&r[1]!=='€ 0').map(r=>`<div class="summ-row"><span class="sk">${r[0]}</span><span class="sv">${r[1]}</span></div>`).join('')}</div>`).join('');
+  const json=JSON.stringify(getData()),code=btoa(String.fromCharCode(...new TextEncoder().encode(json)));
+  document.getElementById('expCode').textContent=code.substring(0,120)+'…';document.getElementById('expCode').dataset.full=code;
+}
+
+// EXPORT
+function copyCode(){const c=document.getElementById('expCode').dataset.full||'';if(!c||c==='...'){toast('Vai prima al riepilogo','err');return;}navigator.clipboard.writeText(c).then(()=>toast('✅ Copiato!')).catch(()=>toast('Copia manuale','err'));}
+function dlJSON(){const d=getData(),b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`famiglia_${(d.q_nome||'cliente').toLowerCase().replace(/\s+/g,'_')}_${d.data?.replace(/\//g,'-')}.json`;a.click();toast('⬇️ Download');}
+function sendWA(){const d=getData(),figli_str=figliData.length>0?figliData.map(f=>`${f.nome} ${f.eta}a`).join(', '):'nessuno';const txt=`📊 *Analisi Familiare – ${d.q_nome}*\n👤 ${d.q_eta} anni · ${d.q_categ||''}\n💑 ${d.q_unione||'—'} con ${d.q_partner_nome||'—'}\n👧 Figli: ${figli_str}\n💰 Reddito: €${parseInt(d.q_reddito||0).toLocaleString('it-IT')}/mese\n🏦 Patrimonio: €${parseInt(d.q_risparmi||0).toLocaleString('it-IT')} risparmi + €${parseInt(d.q_immobile||0).toLocaleString('it-IT')} immobili\n🎯 Obiettivo: €${parseInt(d.q_obiettivo||0).toLocaleString('it-IT')}\n\nCodice: ${(document.getElementById('expCode').dataset.full||'').substring(0,80)}…`;window.open('https://wa.me/?text='+encodeURIComponent(txt));}
+function printReport(){buildSummary();goTo(SECS.length-1);setTimeout(()=>window.print(),400);}
+async function sendToServer(){const s=document.getElementById('spinner');s.style.display='inline-block';try{const d=getData(),r=await fetch(CONFIG.apiEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw new Error('Server error');toast('✅ Inviato!');}catch(e){console.error(e);toast('❌ Fallito','err');}finally{s.style.display='none';}}
+
+// TOAST
+function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(type==='err'?' err':'');t.classList.add('show');clearTimeout(t._tid);t._tid=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// INIT
+(function(){const sl=localStorage.getItem('fam_lang');if(sl&&LANG[sl])currentLang=sl;setLang(currentLang);document.getElementById('pwInput').focus();})();
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();if(unlocked){buildSummary();showSummary();toast('Riepilogo aggiornato');}}});
+</script>
+</body>
+</html>
